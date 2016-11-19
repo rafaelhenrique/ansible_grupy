@@ -33,11 +33,19 @@
   - name: Send configuration nginx file.
     copy: src=nginx.conf dest=/etc/nginx/sites-enabled/default
     become: yes
-    notify:
-    - restart nginx
+    notify: 
+      - stop nginx
+      - start nginx      
 
   handlers:
-    - name: restart nginx
-      service:
-        name: nginx
-        state: restarted
+  - name: stop nginx
+    service: name=nginx enabled=yes state=stopped
+    become: yes
+
+  - name: start nginx
+    service: name=nginx enabled=yes state=started
+    become: yes
+
+  - name: restart nginx
+    service: name=nginx enabled=yes state=restarted
+    become: yes
