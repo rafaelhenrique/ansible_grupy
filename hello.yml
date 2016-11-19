@@ -1,0 +1,18 @@
+---
+# This playbook works fine on Ubuntu 16.04.1 x86_64
+# not tested in another versions
+
+- hosts: grupy-hosts
+  vars:
+    user: grupysp
+    home: /home/grupysp
+    become: true
+
+  tasks:
+  - name: Create user.
+    user: name={{ user }} state=present
+    become: yes
+ 
+  - name: Hello Ansible!
+    shell: echo "Hello Ansible" > {{ home }}/hello_file
+    become: yes

@@ -1,0 +1,43 @@
+---
+# This playbook works fine on Ubuntu 16.04.1 x86_64
+# not tested in another versions
+
+# http://docs.ansible.com/ansible/yum_module.html
+# http://docs.ansible.com/ansible/apt_module.html
+# http://docs.ansible.com/ansible/list_of_packaging_modules.html
+
+- hosts: grupy-hosts
+  vars:
+    system_packages:
+      - nginx
+    become: true
+
+  tasks:
+  # - name: Update system.
+  #   apt: update_cache=yes
+  #   become: yes
+
+  # - name: Upgrade system.
+  #   apt: upgrade=dist
+  #   become: yes
+  - name: Remove some packages.
+    apt: pkg={{ item }} state=absent
+    with_items: "{{ system_packages }}"
+    become: yes
+
+  - name: Install system packages.
+    apt: pkg={{ item }} state=installed allow_unauthenticated=yes update-cache=yes
+    with_items: "{{ system_packages }}"
+    become: yes
+
+  - name: Send configuration nginx file.
+    copy: src=nginx.conf dest=/etc/nginx/sites-enabled/default
+    become: yes
+    notify:
+    - restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

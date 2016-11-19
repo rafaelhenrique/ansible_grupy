@@ -1,0 +1,37 @@
+---
+# This playbook works fine on Ubuntu 16.04.1 x86_64
+# not tested in another versions
+
+- hosts: grupy-hosts
+  vars:
+    virtualenv_directory: /home/grupysp/.venv
+    some_magic_directory: /home/grupysp
+    become: true
+    system_packages:
+      - python3-venv
+
+  tasks:
+  - name: Install system packages.
+    apt: pkg={{ item }} state=installed allow_unauthenticated=yes update-cache=yes
+    with_items: "{{ system_packages }}"
+    become: yes
+
+  - name: Create virtualenv
+    shell: /usr/bin/python3.5 -m venv {{ virtualenv_directory }}  
+    become: yes
+    become_user: grupysp
+
+  - name: Upgrade PIP.
+    shell: "{{ virtualenv_directory }}/bin/pip install --upgrade pip"
+    become: yes
+    become_user: grupysp
+
+  - name: Send requirements.txt.
+    copy: src=requirements.txt dest={{ some_magic_directory }}
+    become: yes
+    become_user: grupysp
+
+  - name: Install requirements of Python project.
+    pip: requirements={{ some_magic_directory }}/requirements.txt virtualenv={{ virtualenv_directory }}
+    become: yes
+    become_user: grupysp
